@@ -1,15 +1,23 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Kadekomst
- * Date: 02.02.2019
- * Time: 19:19
+ * Class KFN_Request
+ * ---------------------------------------
+ * Core class of Kady Fast Notes plugin
+ *
+ * This class is responsible for processing
+ * requested data through $_GET, $_POST,
+ * $_REQUEST objects
+ * ---------------------------------------
+ * @since 1.0.0
+ * @author Kadekomst
  */
 
 namespace KFN\includes;
 
 class KFN_Request {
-
+	/**
+	 * KFN_Request constructor.
+	 */
 	public function __construct() {
 		// code...
 	}
@@ -35,7 +43,7 @@ class KFN_Request {
 			return $post;
 		}
 
-		return array('There is not requested data');
+		return array();
 	}
 
 	/**

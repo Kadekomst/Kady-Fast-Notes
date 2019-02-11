@@ -1,9 +1,15 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Kadekomst
- * Date: 05.02.2019
- * Time: 22:28
+ * Class KFN_Loader
+ * -------------------------------------
+ * Core class of Kady Fast Notes plugin
+ *
+ * This class is responsible for loading
+ * assets files, retrieving filenames
+ * for directories etc.
+ * -------------------------------------
+ * @since 1.0.0
+ * @author Kadekomst
  */
 
 namespace KFN\includes;
@@ -58,12 +64,12 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 				}
 			}
 
-			// If there is no .js-files in any of specified directories, throw an exception
+			// If there is no .css-files in any of specified directories, throw an exception
 			if ( empty( $css_files ) ) {
-				return new \WP_Error( 'kfn_assets_loader_load_scripts_error', 'No .css-files was founded in directory ' . $dir );
+				return new \WP_Error( 'kfn_assets_loader_load_stylesheets_error', 'No .css-files was founded in directory '.$dir );
 			}
 
-			// Finally, let's include our JavaScript to the webpage
+			// Finally, let's include our CSS to the webpage
 			foreach ( $css_files as $path => $file_obj ) {
 				wp_enqueue_style( str_replace( '.css', '', $file_obj['filename'] ), $file_obj['path'] . $file_obj['filename'] );
 			}
@@ -96,7 +102,10 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 			foreach ( $files as $path => $directory ) {
 				foreach ( $directory as $file ) {
 					if ( strpos( $file, '.js' ) ) {
-						$js_files[ $path ] = $file;
+						$js_files[] = array(
+							'path' => $path,
+							'filename' => $file
+						);
 					}
 				}
 			}
@@ -107,8 +116,8 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 			}
 
 			// Finally, let's include our JavaScript to the webpage
-			foreach ( $js_files as $path => $file ) {
-				wp_enqueue_script( str_replace( '.js', '', $file ), $path . $file );
+			foreach ( $js_files as $path => $file_obj ) {
+				wp_enqueue_style( str_replace( '.js', '', $file_obj['filename'] ), $file_obj['path'] . $file_obj['filename'] );
 			}
 
 			// If there were no exceptions, return true
@@ -116,7 +125,7 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 		}
 
 		/**
-		 * KFN_Assets_Loader->parse_dir()
+		 * KFN_Assets_Loader->scan_dir()
 		 * ----------------------------------------------------------------
 		 * Grabs filenames and paths of the files in specified directories
 		 * ----------------------------------------------------------------
@@ -137,16 +146,16 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 				foreach ( $dir_arr as $directory ) {
 					$directories[] = array(
 						'name'         => $directory,
-						'scan_path'    => kfn_get_setting( 'path' ) . $directory,
-						'include_path' => kfn_get_setting( 'url' ) . $directory
+						'scan_path'    => dirname( kfn_get_default_option( 'path' ) ) . '/' . $directory,
+						'include_path' => dirname( kfn_get_default_option( 'url' ) ) . '/' . $directory
 					);
 				}
 			} else if ( is_array( $dir ) ) {
 				foreach ( $dir as $directory ) {
 					$directories[] = array(
 						'name'         => $directory,
-						'scan_path'    => kfn_get_setting( 'path' ) . $directory,
-						'include_path' => kfn_get_setting( 'url' ) . $directory
+						'scan_path'    => dirname( kfn_get_default_option( 'path' ) )  . '/' . $directory,
+						'include_path' => dirname( kfn_get_default_option( 'url' ) )  . '/'. $directory
 					);
 				}
 			} else {
@@ -158,7 +167,9 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 
 			// Generating $all_files array
 			foreach ( $directories as $directory ) {
-				$all_files[ $directory['include_path'] ] = scandir( $directory['scan_path'] );
+				if ( is_dir( $directory['scan_path'] ) ) {
+					$all_files[ $directory['include_path'] ] = array_diff( scandir( $directory['scan_path'] ), array('..', '.') );
+				}
 			}
 
 			// Return all founded files to further processing
@@ -179,8 +190,8 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 		 */
 		public function get_filenames_from_dir( $dir = '', $extension = 'all' )
 		{
-			// todo: Write method body
-			return false;
+			$directories = $this->scan_dir( $dir );
+			return $directories;
 		}
 	}
 

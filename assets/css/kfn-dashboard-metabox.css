@@ -1,0 +1,18 @@
+.kfn {
+    display: flex;
+    flex-direction: column;
+}
+.kfn input[type="text"] {
+    margin: 10px 0;
+}
+
+.kfn-note {
+    margin: 10px 0;
+    border-top: 1px solid #CECECE;
+}
+.kfn-note-title {
+    margin: 10px 0 !important;
+}
+.kfn-note-content {
+    margin: 0;
+}

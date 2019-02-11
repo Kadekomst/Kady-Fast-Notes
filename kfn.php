@@ -13,7 +13,7 @@
  * --------------------------------------------------------------------------------
  * Plugin Name: Kady Fast Notes
  * Plugin URI: https://kady-fast-notes.com
- * Description: Flexible fast notes widget placed on WP console panel for easy access ( dep version )
+ * Description: Flexible fast notes metabox placed on WP console panel for easy access ( dep version )
  * Author: Nikita "Kadekomst" Zabashtin
  * Author URI: https://kady-fast-notes.com
  * Text Domain: kfn
@@ -27,9 +27,8 @@
 // Classes
 use KFN\includes\KFN_Request;
 use KFN\includes\KFN_Hook;
-use KFN\includes\KFN_Settings;
-use KFN\admin\includes\KFN_Dashboard_Widget;
-use KFN\includes\KFN_View;
+use KFN\includes\KFN_Options;
+use KFN\admin\includes\KFN_Dashboard_Metabox;
 use KFN\includes\KFN_Loader;
 
 // WordPress API
@@ -57,11 +56,11 @@ if ( ! class_exists( 'KFN' ) ) :
 		 */
 		public $version = '1.0.0';
 		/**
-		 * Plugin settings
+		 * Plugin default options
 		 * @var string
 		 * @since 1.0.0
 		 */
-		public $settings = array();
+		public $default_options = array();
 		/**
 		 * Include paths for core classes
 		 * @var array
@@ -78,16 +77,16 @@ if ( ! class_exists( 'KFN' ) ) :
 		/**
 		 * KFN->initialize()
 		 * ---------------------------------------
-		 * Initializes the plugin settings, loads
+		 * Initializes the plugin options, loads
 		 * core files etc.
 		 * ---------------------------------------
 		 * @since 1.0.0
 		 */
 		public function initialize() {
 
-			// Initialize settings
-			$this->init_settings();
+			// Initialize options
 			$this->define_default_constants();
+			$this->init_options();
 
 			// Plugin core file loading
 			$this->load_api_helpers();
@@ -98,20 +97,20 @@ if ( ! class_exists( 'KFN' ) ) :
 			$this->globals_init();
 
 			// Initialize KFN_Hook instance which registers WordPress actions/filters.
-			// Initialize KFN_Widget instance which displays the widget in admin-panel.
-			global $kfn_hook, $kfn_widget, $kfn_loader, $kfn_settings;
+			// Initialize KFN_Metabox instance which displays the metabox in admin-panel.
+			global $kfn_hook, $kfn_metabox, $kfn_loader, $kfn_options, $kfn_request;
 
 			// Actions
 			$kfn_hook->add_action('init', array($this, 'register_post_types'));
 
 			// Load CSS and JS files
 			$stylesheets = array("assets/css/", "admin/css/");
-			$scripts = array("assets/js/", "admin/js/");
+			$scripts = array("assets/js/");
 			$kfn_loader->load_stylesheets( $stylesheets );
 			$kfn_loader->load_scripts( $scripts );
 
-			// Display widget
-			$kfn_widget->run();
+			// Display metabox
+			$kfn_metabox->run();
 
 			// Register all actions/filters
 			$kfn_hook->run();
@@ -137,27 +136,24 @@ if ( ! class_exists( 'KFN' ) ) :
 		}
 
 		/**
-		 * KFN->init_settings()
+		 * KFN->init_options()
 		 * -----------------------------------
-		 * Initializes main plugin settings
+		 * Initializes main plugin options
 		 * like various paths, version etc.
 		 * -----------------------------------
 		 * @access private
-		 * @since 1.0.0
+		 * @since 1.0.0s
 		 */
-		private function init_settings() {
-			$plugin_name = $this->plugin_name;
-			$version     = $this->version;
-			$path        = plugin_dir_path( __FILE__ );
-			$basename    = plugin_basename( __FILE__ );
-			$url         = plugin_dir_url( __FILE__ );
-
-			$this->settings = array(
-				'plugin_name' => $plugin_name,
-				'version'     => $version,
-				'path'        => $path,
-				'basename'    => $basename,
-				'url'         => $url
+		private function init_options() {
+			$this->default_options = array(
+				'plugin_name' => $this->plugin_name,
+				'version'     => $this->version,
+				'path'        => KFN_DIR_PATH,
+				'inc_path'    => KFN_DIR_PATH . 'includes/',
+				'admin_path'  => KFN_DIR_PATH . 'admin/',
+ 				'assets_path' => KFN_DIR_PATH . 'assets/',
+ 				'basename'    => plugin_basename( __FILE__ ),
+				'url'         => plugin_dir_url( __FILE__ )
 			);
 		}
 
@@ -180,11 +176,11 @@ if ( ! class_exists( 'KFN' ) ) :
             * KFN_DIR_ASSETS_PATH - path to KFN's /assets sub-directory
             * ----------------------------------------------------------
             */
-			define( 'KFN_DIR_PATH', $this->settings['path'] );
-			define( 'KFN_DIR_INC_PATH', KFN_DIR_PATH . 'includes' );
-			define( 'KFN_DIR_ADMIN_PATH', KFN_DIR_PATH . 'admin' );
-			define( 'KFN_DIR_LANG_PATH', KFN_DIR_PATH . 'lang' );
-			define( 'KFN_DIR_ASSETS_PATH', KFN_DIR_PATH . 'assets' );
+			$this->define( 'KFN_DIR_PATH', plugin_dir_path( __FILE__ ) );
+			$this->define( 'KFN_DIR_INC_PATH', KFN_DIR_PATH . 'includes' );
+			$this->define( 'KFN_DIR_ADMIN_PATH', KFN_DIR_PATH . 'admin' );
+			$this->define( 'KFN_DIR_LANG_PATH', KFN_DIR_PATH . 'lang' );
+			$this->define( 'KFN_DIR_ASSETS_PATH', KFN_DIR_PATH . 'assets' );
 		}
 
 		/**
@@ -257,16 +253,12 @@ if ( ! class_exists( 'KFN' ) ) :
 				$GLOBALS['kfn_hook'] = new KFN_Hook();
 			}
 
-			if ( ! isset( $GLOBALS['kfn_settings'] ) ) {
-				$GLOBALS['kfn_settings'] = new KFN_Settings( $this->settings );
+			if ( ! isset( $GLOBALS['kfn_options'] ) ) {
+				$GLOBALS['kfn_options'] = new KFN_Options( $this->default_options, $this->plugin_name, $this->version );
 			}
 
-			if ( ! isset( $GLOBALS['kfn_widget'] ) ) {
-				$GLOBALS['kfn_widget'] = new KFN_Dashboard_Widget();
-			}
-
-			if ( ! isset( $GLOBALS[ 'kfn_view' ]) ) {
-				$GLOBALS['kfn_view'] = new KFN_View();
+			if ( ! isset( $GLOBALS['kfn_metabox'] ) ) {
+				$GLOBALS['kfn_metabox'] = new KFN_Dashboard_Metabox();
 			}
 
 			if ( ! isset( $GLOBALS[ 'kfn_loader' ]) ) {
@@ -354,10 +346,14 @@ if ( ! class_exists( 'KFN' ) ) :
 	 * @since 1.0.0
 	 */
 	function kfn() {
+		$kfn = '';
+
 		if ( ! isset( $GLOBALS['kfn'] ) ) {
 			$kfn = $GLOBALS['kfn'] = new KFN();
 			$kfn->initialize();
 		}
+
+		return $kfn;
 	}
 
 	// Run the plugin

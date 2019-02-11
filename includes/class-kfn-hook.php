@@ -1,9 +1,16 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Kadekomst
- * Date: 02.02.2019
- * Time: 20:27
+ * Class KFN_Hook
+ * ------------------------------------------
+ * Core class of Kady Fast Note plugin.
+ *
+ * This class is responsible for registering
+ * WordPress actions/filters and saving info
+ * about all of them inside for various
+ * purposes.
+ * -----------------------------------------
+ * @since 1.0.0
+ * @author Kadekomst
  */
 
 namespace KFN\includes;
