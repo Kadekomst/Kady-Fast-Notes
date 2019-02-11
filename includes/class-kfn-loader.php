@@ -27,8 +27,8 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 		public function __construct() {
 			global $kfn;
 
-			if ( method_exists( $kfn, 'load_api_helpers' ) ) {
-				$kfn->load_api_helpers();
+			if ( method_exists( $kfn, 'load_api' ) ) {
+				$kfn->load_api();
 			}
 		}
 
@@ -146,16 +146,16 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 				foreach ( $dir_arr as $directory ) {
 					$directories[] = array(
 						'name'         => $directory,
-						'scan_path'    => dirname( kfn_get_default_option( 'path' ) ) . '/' . $directory,
-						'include_path' => dirname( kfn_get_default_option( 'url' ) ) . '/' . $directory
+						'scan_path'    => kfn_get_default_option( 'path' ) . $directory,
+						'include_path' => kfn_get_default_option( 'url' ) . $directory
 					);
 				}
 			} else if ( is_array( $dir ) ) {
 				foreach ( $dir as $directory ) {
 					$directories[] = array(
 						'name'         => $directory,
-						'scan_path'    => dirname( kfn_get_default_option( 'path' ) )  . '/' . $directory,
-						'include_path' => dirname( kfn_get_default_option( 'url' ) )  . '/'. $directory
+						'scan_path'    => kfn_get_default_option( 'path' ) . $directory,
+						'include_path' => kfn_get_default_option( 'url' ) . $directory
 					);
 				}
 			} else {
@@ -186,7 +186,7 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 		 * @param $dir string|array / Plugin path to the directories. Default: assets/js/
 		 * @param $extension string / Optional. Tells function to return filenames with specified extension.
 		 *
-		 * @return bool
+		 * @return array
 		 */
 		public function get_filenames_from_dir( $dir = '', $extension = 'all' )
 		{
