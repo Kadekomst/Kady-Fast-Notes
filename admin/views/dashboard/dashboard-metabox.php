@@ -8,7 +8,7 @@
  * @since 1.0.0
  */
 
-global $kfn, $kfn_metabox;
+global $kfn, $kfn_dashboard_metabox;
 $kfn->load_api_helpers();
 
 $params = kfn_get_option('dashboard_metabox_form_args');
@@ -36,6 +36,6 @@ $params = kfn_get_option('dashboard_metabox_form_args');
 	       value="<?php echo $params['save_button']['text'] ?>"
 	       class="<?php  echo $params['save_button']['class'] ?>">
 
-    <?php $kfn_metabox->display_notes(); ?>
+    <?php $kfn_dashboard_metabox->display_notes(); ?>
 
 </form>
