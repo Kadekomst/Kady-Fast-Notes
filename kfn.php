@@ -98,7 +98,7 @@ if ( ! class_exists( 'KFN' ) ) :
 
 			// Initialize KFN_Hook instance which registers WordPress actions/filters.
 			// Initialize KFN_Metabox instance which displays the metabox in admin-panel.
-			global $kfn_hook, $kfn_metabox, $kfn_loader, $kfn_options, $kfn_request;
+			global $kfn_hook, $kfn_dashboard_metabox, $kfn_loader, $kfn_options, $kfn_request;
 
 			// Actions
 			$kfn_hook->add_action( 'init', array( $this, 'register_post_types' ) );
@@ -110,7 +110,7 @@ if ( ! class_exists( 'KFN' ) ) :
 			$kfn_loader->load_scripts( $scripts );
 
 			// Display metabox
-			$kfn_metabox->run();
+			$kfn_dashboard_metabox->run();
 
 			// Register all actions/filters
 			$kfn_hook->run();
