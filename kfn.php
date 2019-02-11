@@ -249,8 +249,8 @@ if ( ! class_exists( 'KFN' ) ) :
 			/*
 			 * global $kfn_request
 			 * -----------------------------------------------------------
-			 * Global contains instance of KFN_Request class.
-			 * Used to work with request object and data in them.
+			 * Global variable contains instance of KFN_Request class.
+			 * Used to work with request objects and data in them.
 			 *
 			 * For more information, see includes/class-kfn-request.php
 			 * -----------------------------------------------------------
@@ -262,7 +262,7 @@ if ( ! class_exists( 'KFN' ) ) :
 			/*
 			 * global $kfn_hook
 			 * -----------------------------------------------------------
-			 * Global contains instance of KFN_Hook class.
+			 * Global variable contains instance of KFN_Hook class.
 			 * Used to work with WordPress actions/filters API.
 			 *
 			 * For more information, see includes/class-kfn-hook.php and
@@ -276,7 +276,7 @@ if ( ! class_exists( 'KFN' ) ) :
 			/*
 			 * global $kfn_options
 			 * -----------------------------------------------------------
-			 * Global contains instance of KFN_Options class.
+			 * Global variable contains instance of KFN_Options class.
 			 * Used to work with WordPress Options API
 			 *
 			 * For more information, see includes/class-kfn-hook.php and
@@ -290,7 +290,7 @@ if ( ! class_exists( 'KFN' ) ) :
 			/*
 			 * global $kfn_dashboard_metabox
 			 * ------------------------------------------------------------------------
-			 * Global contains instance of KFN_Dashboard_Metabox class.
+			 * Global variable contains instance of KFN_Dashboard_Metabox class.
 			 * Used to display KFN dashboard meta box
 			 *
 			 * For more information, see admin/includes/class-kfn-dashboard-metabox.php
@@ -303,7 +303,7 @@ if ( ! class_exists( 'KFN' ) ) :
 			/*
 			 * global $kfn_loader
 			 * ------------------------------------------------------------------------
-			 * Global contains instance of KFN_Loader class.
+			 * Global variable contains instance of KFN_Loader class.
 			 * Used to load all JS/CSS plugin library.
 			 *
 			 * For more information, see includes/class-kfn-loader.php
