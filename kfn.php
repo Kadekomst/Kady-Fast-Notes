@@ -44,7 +44,7 @@ if ( ! class_exists( 'KFN' ) ) :
 
 	class KFN {
 		/**
-		 * Plugin version
+		 * Plugin name
 		 * @var string
 		 * @since 1.0.0
 		 */
@@ -84,9 +84,9 @@ if ( ! class_exists( 'KFN' ) ) :
 		 */
 		public function initialize() {
 
-			// Initialize options
+			// Initialize default options and path constants
 			$this->define_default_constants();
-			$this->init_options();
+			$this->init_default_options();
 
 			// Plugin core file loading
 			$this->load_api_helpers();
@@ -101,11 +101,11 @@ if ( ! class_exists( 'KFN' ) ) :
 			global $kfn_hook, $kfn_metabox, $kfn_loader, $kfn_options, $kfn_request;
 
 			// Actions
-			$kfn_hook->add_action('init', array($this, 'register_post_types'));
+			$kfn_hook->add_action( 'init', array( $this, 'register_post_types' ) );
 
 			// Load CSS and JS files
-			$stylesheets = array("assets/css/", "admin/css/");
-			$scripts = array("assets/js/");
+			$stylesheets = array( "assets/css/", "admin/css/" );
+			$scripts     = array( "assets/js/" );
 			$kfn_loader->load_stylesheets( $stylesheets );
 			$kfn_loader->load_scripts( $scripts );
 
@@ -136,7 +136,7 @@ if ( ! class_exists( 'KFN' ) ) :
 		}
 
 		/**
-		 * KFN->init_options()
+		 * KFN->init_default_options()
 		 * -----------------------------------
 		 * Initializes main plugin options
 		 * like various paths, version etc.
@@ -144,15 +144,15 @@ if ( ! class_exists( 'KFN' ) ) :
 		 * @access private
 		 * @since 1.0.0s
 		 */
-		private function init_options() {
+		private function init_default_options() {
 			$this->default_options = array(
 				'plugin_name' => $this->plugin_name,
 				'version'     => $this->version,
 				'path'        => KFN_DIR_PATH,
 				'inc_path'    => KFN_DIR_PATH . 'includes/',
 				'admin_path'  => KFN_DIR_PATH . 'admin/',
- 				'assets_path' => KFN_DIR_PATH . 'assets/',
- 				'basename'    => plugin_basename( __FILE__ ),
+				'assets_path' => KFN_DIR_PATH . 'assets/',
+				'basename'    => plugin_basename( __FILE__ ),
 				'url'         => plugin_dir_url( __FILE__ )
 			);
 		}
@@ -245,23 +245,72 @@ if ( ! class_exists( 'KFN' ) ) :
 		 * @access private
 		 */
 		private function globals_init() {
+
+			/*
+			 * global $kfn_request
+			 * -----------------------------------------------------------
+			 * Global contains instance of KFN_Request class.
+			 * Used to work with request object and data in them.
+			 *
+			 * For more information, see includes/class-kfn-request.php
+			 * -----------------------------------------------------------
+			 * @since 1.0.0
+			 * */
 			if ( ! isset( $GLOBALS['kfn_request'] ) ) {
 				$GLOBALS['kfn_request'] = new KFN_Request();
 			}
-
+			/*
+			 * global $kfn_hook
+			 * -----------------------------------------------------------
+			 * Global contains instance of KFN_Hook class.
+			 * Used to work with WordPress actions/filters API.
+			 *
+			 * For more information, see includes/class-kfn-hook.php and
+			 * includes/api/hook.php
+			 * -----------------------------------------------------------
+			 * @since 1.0.0
+			 * */
 			if ( ! isset( $GLOBALS['kfn_hook'] ) ) {
 				$GLOBALS['kfn_hook'] = new KFN_Hook();
 			}
-
+			/*
+			 * global $kfn_options
+			 * -----------------------------------------------------------
+			 * Global contains instance of KFN_Options class.
+			 * Used to work with WordPress Options API
+			 *
+			 * For more information, see includes/class-kfn-hook.php and
+			 * includes/api/options.php
+			 * -----------------------------------------------------------
+			 * @since 1.0.0
+			 * */
 			if ( ! isset( $GLOBALS['kfn_options'] ) ) {
-				$GLOBALS['kfn_options'] = new KFN_Options( $this->default_options, $this->plugin_name, $this->version );
+				$GLOBALS['kfn_options'] = new KFN_Options( $this->default_options );
 			}
-
-			if ( ! isset( $GLOBALS['kfn_metabox'] ) ) {
-				$GLOBALS['kfn_metabox'] = new KFN_Dashboard_Metabox();
+			/*
+			 * global $kfn_dashboard_metabox
+			 * ------------------------------------------------------------------------
+			 * Global contains instance of KFN_Dashboard_Metabox class.
+			 * Used to display KFN dashboard meta box
+			 *
+			 * For more information, see admin/includes/class-kfn-dashboard-metabox.php
+			 * -------------------------------------------------------------------------
+			 * @since 1.0.0
+			 * */
+			if ( ! isset( $GLOBALS['kfn_dashboard_metabox'] ) ) {
+				$GLOBALS['kfn_dashboard_metabox'] = new KFN_Dashboard_Metabox();
 			}
-
-			if ( ! isset( $GLOBALS[ 'kfn_loader' ]) ) {
+			/*
+			 * global $kfn_loader
+			 * ------------------------------------------------------------------------
+			 * Global contains instance of KFN_Loader class.
+			 * Used to load all JS/CSS plugin library.
+			 *
+			 * For more information, see includes/class-kfn-loader.php
+			 * -------------------------------------------------------------------------
+			 * @since 1.0.0
+			 * */
+			if ( ! isset( $GLOBALS['kfn_loader'] ) ) {
 				$GLOBALS['kfn_loader'] = new KFN_Loader();
 			}
 		}
