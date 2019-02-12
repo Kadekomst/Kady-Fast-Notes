@@ -219,4 +219,17 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 		kfn_include('admin/views/dashboard/dashboard-metabox-note.php');
 	}
 
+	/**
+	 * KFN_Dashboard_Metabox->delete_all_notes()
+	 * -------------------------------------------
+	 * Deletes all registered notes
+	 * -------------------------------------------
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public function delete_all_notes() {
+		kfn_update_option('dashboard_metabox_notes', array());
+	}
+
 }
