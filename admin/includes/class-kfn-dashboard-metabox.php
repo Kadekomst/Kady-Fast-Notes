@@ -16,7 +16,6 @@ namespace KFN\admin\includes;
 
 // KFN_Metabox interface
 use KFN\admin\includes\interfaces\KFN_Metabox;
-
 require(KFN_DIR_PATH . 'admin/includes/interfaces/interface-kfn-metabox.php');
 
 class KFN_Dashboard_Metabox implements KFN_Metabox {
@@ -47,8 +46,8 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	public function __construct() {
 		global $kfn;
 
-		if ( method_exists( $kfn, 'load_api_helpers' ) && method_exists( $kfn, 'load_tests' ) ) {
-			$kfn->load_api_helpers();
+		if ( method_exists( $kfn, 'load_api' ) && method_exists( $kfn, 'load_tests' ) ) {
+			$kfn->load_api();
 			$kfn->load_tests();
 		}
 	}
@@ -191,12 +190,12 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 			$notes_array = $kfn_options->get_option('dashboard_metabox_notes');
 
 			$notes_array[ $title ] = array(
-				'date'    => current_time( get_option( 'time_format' ) ),
+				'date'    => current_time( 'Y-m-d H:i:s' ),
 				'title'   => $sanitized_title,
 				'content' => $sanitized_content
 			);
 
-			print_r($notes_array);
+			$kfn_options->update_option( 'dashboard_metabox_notes', $notes_array );
 		}
 	}
 
@@ -219,4 +218,5 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 		// Print out our notes
 		kfn_include('admin/views/dashboard/dashboard-metabox-note.php');
 	}
+
 }
