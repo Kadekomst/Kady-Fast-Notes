@@ -16,7 +16,8 @@ namespace KFN\admin\includes;
 
 // KFN_Metabox interface
 use KFN\admin\includes\interfaces\KFN_Metabox;
-require(KFN_DIR_PATH . 'admin/includes/interfaces/interface-kfn-metabox.php');
+
+require( KFN_DIR_PATH . 'admin/includes/interfaces/interface-kfn-metabox.php' );
 
 class KFN_Dashboard_Metabox implements KFN_Metabox {
 	/**
@@ -48,9 +49,9 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 
 		if ( method_exists( $kfn, 'load_api' ) && method_exists( $kfn, 'load_tests' ) ) {
 			$kfn->load_api();
-			$kfn->load_tests();
 		}
 	}
+
 	/**
 	 * KFN_Dashboard_Metabox->init()
 	 * -------------------------------------
@@ -87,7 +88,7 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 		global $kfn_options;
 
 		// Dashboard metabox parameters ( used to build add_meta_box() call )
-		$this->metabox_args = array(
+		$metabox_args = array(
 			'id'       => 'kfn',
 			'name'     => 'Kady Fast Notes',
 			'callback' => array( $this, 'metabox' ),
@@ -97,35 +98,31 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 		);
 
 		// Add new option and filter for it
-		$kfn_options->add_option( 'dashboard_metabox_args', apply_filters( 'kfn_dashboard_metabox_args', $this->metabox_args ) );
+		$kfn_options->add_option( 'dashboard_metabox_args', apply_filters( 'kfn_dashboard_metabox_args', $metabox_args ) );
 
 		// Dashboard metabox form parameters ( used to generate view for metabox )
 		$this->metabox_form_args = array(
-			'form_class'    => 'kfn',
-			'title_input'   => array(
+			'action'           => '',
+			'method'           => 'POST',
+			'title_input'      => array(
 				'label_text'  => 'Title',
 				'type'        => 'text',
 				'name'        => 'kfn_title',
-				'placeholder' => 'Enter the title of the note!'
+				'placeholder' => 'Enter the title of the note!',
 			),
-			'content_input' => array(
-				'type'        => 'text',
+			'content_textarea' => array(
 				'label_text'  => 'Content',
 				'name'        => 'kfn_content',
-				'placeholder' => 'Enter the content of your note!'
-			),
-			'save_button'   => array(
-				'type'  => 'submit',
-				'text'  => 'Save',
-				'class' => 'button button-primary'
+				'placeholder' => 'Enter the content of your note!',
+				'class'       => 'kfn-dashboard-textarea'
 			)
 		);
 
 		// Add new "kfn_dashboard_form_args" and "kfn_dashboard_metabox_form_args" filter for it.
-		$kfn_options->add_option( 'dashboard_metabox_form_args', apply_filters( 'kfn_dashboard_metabox_form_args', $this->metabox_form_args ) );
+		$kfn_options->update_option( 'dashboard_metabox_form_args', apply_filters( 'kfn_dashboard_metabox_form_args', $this->metabox_form_args ) );
 
 		// Option contains all registered notes
-		$kfn_options->add_option('dashboard_metabox_notes', $this->notes);
+		$kfn_options->add_option( 'dashboard_metabox_notes', $this->notes );
 	}
 
 	/**
@@ -172,8 +169,7 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 *
 	 * @return \WP_Error|void
 	 */
-	public function save()
-	{
+	public function save() {
 		global $kfn_request, $kfn_options;
 
 		// Get data from current request object
@@ -181,21 +177,32 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 
 		// Sanitize received data and put it into database
 		if ( ! empty( $request ) ) {
-			$title   = $kfn_request->is_set( $request[ $this->metabox_form_args['title_input']['name'] ] ) ? $request[ $this->metabox_form_args['title_input']['name'] ] : '';
-			$content = $kfn_request->is_set( $request[ $this->metabox_form_args['content_input']['name'] ] ) ? $request[ $this->metabox_form_args['content_input']['name'] ] : '';
 
+			// Processing all form fields
+			$title   = $kfn_request->is_set( $request[ $this->metabox_form_args['title_input']['name'] ] )
+				? $request[ $this->metabox_form_args['title_input']['name'] ]
+				: 'Please enter the title of the note!';
+			$content = $kfn_request->is_set( $request[ $this->metabox_form_args['content_textarea']['name'] ] )
+				? $request[ $this->metabox_form_args['content_textarea']['name'] ]
+				: 'Please write the content of the note!';
+
+			// Sanitizing all form fields
 			$sanitized_title   = sanitize_text_field( $title );
-			$sanitized_content = sanitize_text_field( $content );
+			$sanitized_content = sanitize_textarea_field( $content );
+			$date_format       = apply_filters( 'kfn_date_format', 'd.m.y' );
 
-			$notes_array = $kfn_options->get_option('dashboard_metabox_notes');
+			// Receive current notes array
+			$this->notes = $kfn_options->get_option( 'dashboard_metabox_notes' );
 
-			$notes_array[ $title ] = array(
-				'date'    => current_time( 'Y-m-d H:i:s' ),
+			// Add new note to the notes array
+			$this->notes[ $sanitized_title ] = array(
+				'date'    => current_time( $date_format ),
 				'title'   => $sanitized_title,
 				'content' => $sanitized_content
 			);
 
-			$kfn_options->update_option( 'dashboard_metabox_notes', $notes_array );
+			// Update notes array in database
+			$kfn_options->update_option( 'dashboard_metabox_notes', $this->notes );
 		}
 	}
 
@@ -210,13 +217,12 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 *
 	 * @return \WP_Error|void
 	 */
-	public function display_notes()
-	{
+	public function display_notes() {
 		// If there is new note requested, save it
 		$this->save();
 
 		// Print out our notes
-		kfn_include('admin/views/dashboard/dashboard-metabox-note.php');
+		kfn_include( 'admin/views/dashboard/dashboard-metabox-note.php' );
 	}
 
 	/**
@@ -229,7 +235,7 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 * @return void
 	 */
 	public function delete_all_notes() {
-		kfn_update_option('dashboard_metabox_notes', array());
+		kfn_update_option( 'dashboard_metabox_notes', array() );
 	}
 
 }
