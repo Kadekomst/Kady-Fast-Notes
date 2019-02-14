@@ -17,6 +17,11 @@ namespace KFN\admin\includes;
 // KFN_Metabox interface
 use KFN\admin\includes\interfaces\KFN_Metabox;
 
+// Classes
+use KFN\includes\KFN_Hook;
+use KFN\includes\KFN_Options;
+use KFN\includes\KFN_Request;
+
 require( KFN_DIR_PATH . 'admin/includes/interfaces/interface-kfn-metabox.php' );
 
 class KFN_Dashboard_Metabox implements KFN_Metabox {
@@ -37,12 +42,14 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 * @var array
 	 * @since 1.0.0
 	 */
-	public $notes = array();
+	public $notes;
 
 	/**
 	 * KFN_Metabox constructor.
 	 * ----------------------------------------
 	 * Loads api helpers for easier plugin use
+	 * ----------------------------------------
+	 * @global KFN_Options
 	 */
 	public function __construct() {
 		global $kfn;
@@ -58,6 +65,8 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 * Inherited from KFN_Metabox interface
 	 * Initializes KFN dashboard metabox
 	 * -------------------------------------
+	 * @global KFN_Options;
+	 *
 	 * @since 1.0.0
 	 * @return void
 	 */
@@ -72,7 +81,14 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 		$this->metabox_args = $kfn_options->get_option( 'dashboard_metabox_args' );
 
 		// Register new metabox
-		add_meta_box( $this->metabox_args['id'], $this->metabox_args['name'], $this->metabox_args['callback'], $this->metabox_args['screen'], $this->metabox_args['context'], $this->metabox_args['priority'] );
+		add_meta_box(
+			$this->metabox_args['id'],
+			$this->metabox_args['name'],
+			$this->metabox_args['callback'],
+			$this->metabox_args['screen'],
+			$this->metabox_args['context'],
+			$this->metabox_args['priority']
+		);
 	}
 
 	/**
@@ -81,6 +97,8 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 * Initializes default parameters for KFN dashboard metabox block
 	 * ( used for add_meta_box() call ) and KFN dashboard metabox form
 	 * -----------------------------------------------------------------
+	 * @global KFN_Options;
+	 *
 	 * @since 1.0.0
 	 * @return void
 	 */
@@ -131,6 +149,8 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 * Bootstrap method for the metabox ( register init() method to the
 	 * "wp_dashboard_setup" action )
 	 * ---------------------------------------------------------------------
+	 * @global KFN_Hook;
+	 *
 	 * @since 1.0.0
 	 * @return void
 	 */
@@ -147,8 +167,6 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 * ---------------------------------
 	 * Draws metabox markup
 	 * ---------------------------------
-	 * @global KFN_View
-	 *
 	 * @since 1.0.0
 	 *
 	 * @return \WP_Error|void
@@ -163,14 +181,14 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 * -------------------------------------------
 	 * Saves new note if it is requested by user
 	 * -------------------------------------------
-	 * @global KFN_View
+	 * @global KFN_Request|KFN_Options;
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return \WP_Error|void
 	 */
 	public function save() {
-		global $kfn_request, $kfn_options;
+		global $kfn_request;
 
 		// Get data from current request object
 		$request = $kfn_request->get_current_request();
@@ -189,20 +207,21 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 			// Sanitizing all form fields
 			$sanitized_title   = sanitize_text_field( $title );
 			$sanitized_content = sanitize_textarea_field( $content );
-			$date_format       = apply_filters( 'kfn_date_format', 'd.m.y' );
 
-			// Receive current notes array
-			$this->notes = $kfn_options->get_option( 'dashboard_metabox_notes' );
-
-			// Add new note to the notes array
-			$this->notes[ $sanitized_title ] = array(
-				'date'    => current_time( $date_format ),
-				'title'   => $sanitized_title,
-				'content' => $sanitized_content
+			// New post args
+			$new_post_args = array(
+				'post_author' => get_current_user_id(),
+				'post_content' => $sanitized_content,
+				'post_title' => $sanitized_title,
+				'post_status' => 'draft',
+				'post_type' => 'kfn',
 			);
 
-			// Update notes array in database
-			$kfn_options->update_option( 'dashboard_metabox_notes', $this->notes );
+			// Insert new post into database
+			wp_insert_post(
+				$new_post_args,
+				true
+			);
 		}
 	}
 
@@ -211,8 +230,6 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 * -------------------------------------------
 	 * Displays all registered notes
 	 * -------------------------------------------
-	 * @global KFN_View
-	 *
 	 * @since 1.0.0
 	 *
 	 * @return \WP_Error|void
