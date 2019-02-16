@@ -16,6 +16,7 @@ namespace KFN\admin\includes;
 
 // KFN_Metabox interface
 use KFN\admin\includes\interfaces\KFN_Metabox;
+use WP_Query;
 
 // Classes
 use KFN\includes\KFN_Hook;
@@ -252,7 +253,14 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 	 * @return void
 	 */
 	public function delete_all_notes() {
-		kfn_update_option( 'dashboard_metabox_notes', array() );
-	}
+		$notes = new WP_Query( array(
+			'numberposts'      => -1,
+			'post_type'        => 'kfn',
+		) );
 
+		while ( $notes->have_posts() ) {
+			$notes->the_post();
+			wp_delete_post( $notes->post->ID, false );
+		}
+	}
 }
