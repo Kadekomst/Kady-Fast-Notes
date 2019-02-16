@@ -21,12 +21,11 @@ use WP_Error;
 class KFN_Options {
 	/**
 	 * Array of plugin options.
-	 * Accepted from KFN class
 	 * ---------------------------
 	 * @since 1.0.0
 	 * @var array
 	 */
-	protected $options = array();
+	protected $main_object;
 
 	/**
 	 * Array of options which values are protected
@@ -40,12 +39,15 @@ class KFN_Options {
 	/**
 	 * KFN_Settings constructor.
 	 * -------------------------------------------------------------------
-	 * Sets up default plugin options
+	 * Sets up main option called "kfn"
 	 * -------------------------------------------------------------------
+	 *
 	 * @param $defaults / Default parameter. Accepted from main KFN class
 	 */
 	public function __construct( $defaults ) {
-		$this->add_option('defaults', $defaults);
+		$this->main_object = get_option('kfn');
+		$this->main_object['defaults'] = $defaults;
+		update_option('kfn', $this->main_object);
 	}
 
 	/**
@@ -57,10 +59,8 @@ class KFN_Options {
 	 * @since 1.0.0
 	 * @return array
 	 */
-	public function get_options_object()
-	{
-		$options = $this->options;
-		return $options;
+	public function get_main_object() {
+		return $this->main_object;
 	}
 
 	/**
@@ -76,11 +76,7 @@ class KFN_Options {
 	 * @return WP_Error|mixed
 	 */
 	public function get_option( $option ) {
-		if ( ! $this->has_option( $option ) ) {
-			return new WP_Error( 'kfn_option_not_found', "Requested \"$option\" option is not registered in KFN plugin!" );
-		}
-
-		return get_option( 'kfn_'.$option );
+		return get_option('kfn')[ $option ];
 	}
 
 	/**
@@ -100,7 +96,9 @@ class KFN_Options {
 			return new WP_Error( 'kfn_has_option_wrong_type', 'Parameter $option expected string, got' . gettype( $option ) );
 		}
 
-		if ( isset( $this->options[ $option ] ) ) {
+		$main_object = $this->get_main_object();
+
+		if ( isset( $main_object[ $option ] ) ) {
 			return true;
 		}
 
@@ -132,8 +130,8 @@ class KFN_Options {
 			}
 		}
 
-		$this->options[ $option ] = $value;
-		update_option( 'kfn_' . $option, $value );
+		$this->main_object[ $option ] = $value;
+		update_option( 'kfn', $this->main_object );
 
 		return true;
 	}
@@ -155,8 +153,10 @@ class KFN_Options {
 	public function add_option( $option, $value ) {
 
 		if ( ! $this->has_option( $option ) ) {
-			$this->options[ $option ] = $value;
-			add_option( 'kfn_' . $option, $value );
+
+			$this->main_object[ $option ] = $value;
+			update_option( 'kfn', $this->main_object );
+
 		} else {
 			return new WP_Error( 'kfn_options_add_option_option_has_already_defined', 'Setting "' . $option . '" has already defined!' );
 		}
@@ -188,8 +188,8 @@ class KFN_Options {
 			}
 		}
 
-		unset( $this->options[ $option ] );
-		delete_option( $option );
+		unset( $this->main_object[ $option ] );
+		update_option('kfn', $this->main_object);
 
 		return true;
 	}
