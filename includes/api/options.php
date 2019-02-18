@@ -47,16 +47,16 @@ function kfn_get_option( $option ) {
  *
  * @param $option
  *
- * @return \KFN\includes\KFN_Options|WP_Error|bool;
+ * @return mixed|bool;
  */
 function kfn_get_default_option( $option ) {
 	global $kfn_options;
 
 	if ( isset( $kfn_options ) && method_exists( $kfn_options, 'get_option') ) {
 		return $kfn_options->get_option( 'defaults' )[ $option ];
-	} else {
-		return new WP_Error('kfn_update_option_func_undefined_global', 'Global $kfn_options or its method update_option() was not defined!');
 	}
+
+	return $option;
 }
 
 /**
