@@ -40,7 +40,7 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 		 * -------------------------------------------------------------
 		 * @since 1.0.0
 		 *
-		 * @param $dir string / Plugin path to the directory contained .css-files
+		 * @param $dir string|array / Plugin path to the directory contained .css-files
 		 *
 		 * @return \WP_Error|bool
 		 */
@@ -71,7 +71,12 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 
 			// Finally, let's include our CSS to the webpage
 			foreach ( $css_files as $path => $file_obj ) {
-				wp_enqueue_style( str_replace( '.css', '', $file_obj['filename'] ), $file_obj['path'] . $file_obj['filename'] );
+				wp_enqueue_style(
+					str_replace( '.css', '', $file_obj['filename'] ),
+					$file_obj['path'] . $file_obj['filename'],
+					null,
+					kfn_get_default_option( 'version' )
+				);
 			}
 
 			// If there were no exceptions, return true
@@ -117,7 +122,12 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 
 			// Finally, let's include our JavaScript to the webpage
 			foreach ( $js_files as $path => $file_obj ) {
-				wp_enqueue_style( str_replace( '.js', '', $file_obj['filename'] ), $file_obj['path'] . $file_obj['filename'] );
+				wp_enqueue_script(
+					str_replace( '.js', '', $file_obj['filename'] ),
+					$file_obj['path'] . $file_obj['filename'],
+					null,
+					kfn_get_default_option( 'version' )
+				);
 			}
 
 			// If there were no exceptions, return true
@@ -131,7 +141,7 @@ if ( ! class_exists( 'KFN_Loader' ) ) {
 		 * ----------------------------------------------------------------
 		 * @since 1.0.0
 		 *
-		 * @param $dir string / Plugin path to the directories. Default: assets/js/
+		 * @param $dir string|array / Plugin path to the directories.
 		 *
 		 * @return \WP_Error|array
 		 */
