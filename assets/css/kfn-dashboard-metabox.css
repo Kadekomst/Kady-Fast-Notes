@@ -1,18 +1,46 @@
-.kfn {
+/*
+* kfn-dashboard-metabox.css
+* ----------------------------------------------------------
+* File contains CSS rules for KFN dashboard notes meta box
+* -----------------------------------------------------------
+* @since 1.0.0
+* @author Kadekomst
+*/
+
+/* Notes form settings */
+
+.kfn-dashboard-metabox {
     display: flex;
     flex-direction: column;
+    font-family: 'Arial', sans-serif !important;
 }
-.kfn input[type="text"] {
+.kfn-dashboard-input {
+    padding: 8px 8px;
     margin: 10px 0;
+}
+.kfn-dashboard-label {
+    font-size: 14px;
+}
+.kfn-dashboard-textarea {
+    margin: 10px 0;
+    padding: 10px;
 }
 
-.kfn-note {
-    margin: 10px 0;
+/* Notes section settings */
+
+.kfn-dashboard-note {
+    padding: 10px 0;
+    font-family: 'Arial', sans-serif !important;
     border-top: 1px solid #CECECE;
 }
-.kfn-note-title {
-    margin: 10px 0 !important;
+.kfn-dashboard-note:first-child {
+    margin-top: 10px;
 }
-.kfn-note-content {
+.kfn-dashboard-note-title {
+    color: #000;
+    text-decoration: none !important;
+    font-size: 14px;
+}
+.kfn-dashboard-note-content {
     margin: 0;
 }

@@ -13,7 +13,7 @@
  * --------------------------------------------------------------------------------
  * Plugin Name: Kady Fast Notes
  * Plugin URI: https://kady-fast-notes.com
- * Description: Flexible fast notes metabox placed on WP console panel for easy access ( dep version )
+ * Description: Flexible fast notes metabox placed on WP console panel for easy access.
  * Author: Nikita "Kadekomst" Zabashtin
  * Author URI: https://kady-fast-notes.com
  * Text Domain: kfn
@@ -24,15 +24,19 @@
  * License URI: ...
  */
 
-// Classes
+// Core classes
 use KFN\includes\KFN_Request;
 use KFN\includes\KFN_Hook;
 use KFN\includes\KFN_Options;
-use KFN\admin\includes\KFN_Dashboard_Metabox;
 use KFN\includes\KFN_Loader;
 
+// Admin-specific classes
+use KFN\admin\includes\KFN_Dashboard_Metabox;
+use KFN\admin\includes\settings\KFN_Settings_Page;
+use KFN\admin\includes\settings\KFN_Settings_Page_Callbacks;
+
 // WordPress API
-include( ABSPATH . 'wp-load.php' );
+require( ABSPATH . 'wp-load.php' );
 
 // If accessed directly, exit
 if ( ! defined( 'WPINC' ) || ! defined( 'ABSPATH' ) ) {
@@ -89,16 +93,17 @@ if ( ! class_exists( 'KFN' ) ) :
 			$this->init_default_options();
 
 			// Plugin core file loading
-			$this->load_api_helpers();
+			$this->load_api();
 			$this->load_classes();
-			$this->load_tests();
 
 			// After full plugin files loading, init the globals
 			$this->globals_init();
 
 			// Initialize KFN_Hook instance which registers WordPress actions/filters.
-			// Initialize KFN_Metabox instance which displays the metabox in admin-panel.
-			global $kfn_hook, $kfn_dashboard_metabox, $kfn_loader, $kfn_options, $kfn_request;
+			// Initialize KFN_Dashboard_Metabox instance which displays the metabox in admin-panel.
+			// Initialize KFN_Loader instance which loads styles and scripts
+			// Initialize KFN_Options instance which works with database via WordPress Options API.
+			global $kfn_hook, $kfn_dashboard_metabox, $kfn_loader, $kfn_options;
 
 			// Actions
 			$kfn_hook->add_action( 'init', array( $this, 'register_post_types' ) );
@@ -112,8 +117,16 @@ if ( ! class_exists( 'KFN' ) ) :
 			// Display metabox
 			$kfn_dashboard_metabox->run();
 
+			$this->_tests();
+
 			// Register all actions/filters
 			$kfn_hook->run();
+
+		}
+
+
+		private function _tests() {
+
 		}
 
 		/**
@@ -184,14 +197,14 @@ if ( ! class_exists( 'KFN' ) ) :
 		}
 
 		/**
-		 * KFN->load_api_helpers()
+		 * KFN->load_api()
 		 * ----------------------------------
 		 * Loads all API functions
 		 * ---------------------------------
 		 * @since 1.0.0
 		 * @access private
 		 */
-		public function load_api_helpers() {
+		public function load_api() {
 			require_once( KFN_DIR_INC_PATH . '/api/include.php' );
 
 			foreach ( glob( KFN_DIR_INC_PATH . '\api\*.php' ) as $file ) {
@@ -210,7 +223,8 @@ if ( ! class_exists( 'KFN' ) ) :
 		public function load_classes() {
 			$this->class_include_paths = array(
 				'admin' => KFN_DIR_ADMIN_PATH . '/includes/class-kfn-*.php',
-				'core'  => KFN_DIR_INC_PATH . '/class-kfn-*.php'
+				'core'  => KFN_DIR_INC_PATH . '/class-kfn-*.php',
+				'settings' => KFN_DIR_ADMIN_PATH . '/includes/settings/class-kfn-settings-*.php'
 			);
 
 			foreach ( $this->class_include_paths as $path ) {
@@ -221,7 +235,7 @@ if ( ! class_exists( 'KFN' ) ) :
 		}
 
 		/**
-		 * KFN->load_api_helpers()
+		 * KFN->load_api()
 		 * -------------------------------------------
 		 * Loads different plugin functionality tests
 		 * -------------------------------------------
@@ -313,6 +327,20 @@ if ( ! class_exists( 'KFN' ) ) :
 			if ( ! isset( $GLOBALS['kfn_loader'] ) ) {
 				$GLOBALS['kfn_loader'] = new KFN_Loader();
 			}
+			/*
+			 * global $kfn_settings_page
+			 * -----------------------------------------------------------------------------
+			 * Global variable contains instance of KFN_Settings_Page class.
+			 * Used to draw and display plugin settings page.
+			 *
+			 * For more information, see admin/includes/settings/class-kfn-settings-page.php
+			 * ------------------------------------------------------------------------------
+			 * @since 1.0.0
+			 * */
+			if ( ! isset( $GLOBALS['kfn_settings_page'] ) ) {
+				$callbacks = new KFN_Settings_Page_Callbacks();
+				$GLOBALS['kfn_settings_page'] = new KFN_Settings_Page( $callbacks );
+			}
 		}
 
 		/**
@@ -327,16 +355,16 @@ if ( ! class_exists( 'KFN' ) ) :
 			register_post_type( 'kfn', array(
 				'label'               => null,
 				'labels'              => array(
-					'name'               => __( 'Kady Fast Notes', 'kfn' ),
-					'singular_name'      => __( 'Kady Fast Notes', 'kfn' ),
-					'add_new'            => __( 'Add note', 'kfn' ),
-					'add_new_item'       => __( 'Add new note', 'kfn' ),
-					'edit_item'          => __( 'Edit note', 'kfn' ),
+					'name'               => __( 'All Notes', 'kfn' ),
+					'singular_name'      => __( 'All Notes', 'kfn' ),
+					'add_new'            => __( 'Add Note', 'kfn' ),
+					'add_new_item'       => __( 'Add New Note', 'kfn' ),
+					'edit_item'          => __( 'Edit Note', 'kfn' ),
 					'new_item'           => __( 'Note Content', 'kfn' ),
-					'view_item'          => __( 'View note', 'kfn' ),
-					'search_items'       => __( 'Search for note', 'kfn' ),
-					'not_found'          => __( 'Not found', 'kfn' ),
-					'not_found_in_trash' => __( 'Not found in trash', 'kfn' ),
+					'view_item'          => __( 'View Note', 'kfn' ),
+					'search_items'       => __( 'Search For Note', 'kfn' ),
+					'not_found'          => __( 'Not Found', 'kfn' ),
+					'not_found_in_trash' => __( 'Not Found in Trash', 'kfn' ),
 					'parent_item_colon'  => '',
 					'menu_name'          => 'Kady Fast Notes',
 				),
@@ -351,7 +379,7 @@ if ( ! class_exists( 'KFN' ) ) :
 				'show_in_rest'        => null,
 				'rest_base'           => null,
 				'menu_position'       => null,
-				'menu_icon'           => null,
+				'menu_icon'           => 'dashicons-list-view',
 				//'capability_type'   => 'pos
 				//'capabilities'      => 'post',
 				//'map_meta_cap'      => null,

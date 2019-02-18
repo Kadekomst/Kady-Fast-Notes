@@ -197,7 +197,7 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 		// Sanitize received data and put it into database
 		if ( ! empty( $request ) ) {
 
-			// Processing all form fields
+			// Processing all form dashboard
 			$title   = $kfn_request->is_set( $request[ $this->metabox_form_args['title_input']['name'] ] )
 				? $request[ $this->metabox_form_args['title_input']['name'] ]
 				: 'Please enter the title of the note!';
@@ -205,7 +205,7 @@ class KFN_Dashboard_Metabox implements KFN_Metabox {
 				? $request[ $this->metabox_form_args['content_textarea']['name'] ]
 				: 'Please write the content of the note!';
 
-			// Sanitizing all form fields
+			// Sanitizing all form dashboard
 			$sanitized_title   = sanitize_text_field( $title );
 			$sanitized_content = sanitize_textarea_field( $content );
 

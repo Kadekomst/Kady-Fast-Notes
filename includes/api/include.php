@@ -7,7 +7,7 @@
  * -------------------------------------------------------------
  * @since 1.0.0
  * @author Kadekomst
- * @link https://kfn.com/widget
+ * @link https://kady-fast-notes.com/widget
  */
 
 /**
