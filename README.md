@@ -11,6 +11,6 @@ Also you can find the copy of https://kady-fast-notes.com documentation here in 
 3. Go to Plugins -> Downloaded
 4. Find "Kady Fast Notes" plugin and hit "Activate" button.
 
-# Installation in WordPress Directory repo.
-That's a pity that there is no support for this installation method right now. 
+# Installation from WordPress Directory repo.
+That's a pity that there is no support for this installation method now. 
 Kady Fast Notes will be added to WordPress Directory repo in nearest future.
